@@ -27,9 +27,19 @@ export class PerformanceMetricTracker
         }, 0);
     }
 
-    public static get averageDuration()
+    public static get averageDurationInMilliseconds()
     {
         return this.totalDuration / Object.keys(this.timestamps).length;
+    }
+
+    public static get averageDurationInSeconds()
+    {
+        return this.averageDurationInMilliseconds / 1000;
+    }
+
+    public static get averageDurationInMinutes()
+    {
+        return this.averageDurationInSeconds / 60;
     }
 
     public static start(key: number)

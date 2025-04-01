@@ -93,7 +93,15 @@ describe('PerformanceMetricTracker', () =>
         });
     });
 
-    describe('averageDuration', () =>
+    describe.each([
+        ['in milliseconds', 'averageDurationInMilliseconds', 1],
+        ['in seconds', 'averageDurationInSeconds', 1000],
+        ['in minutes', 'averageDurationInMinutes', 60000],
+    ] as [
+        string,
+        'averageDurationInMilliseconds' | 'averageDurationInSeconds' | 'averageDurationInMinutes',
+        number
+    ][])('average duration %s', (_, valueToCheck, expectedResultDivisor) =>
     {
         test('should calculate average duration correctly with one key', () =>
         {
@@ -107,7 +115,9 @@ describe('PerformanceMetricTracker', () =>
             PerformanceMetricTracker.start(key);
             PerformanceMetricTracker.end(key);
 
-            expect(PerformanceMetricTracker.averageDuration).toEqual(endTime - startTime);
+            expect(PerformanceMetricTracker[valueToCheck]).toEqual(
+                (endTime - startTime) / expectedResultDivisor,
+            );
         });
 
         test('should calculate average duration correctly with two keys', () =>
@@ -129,11 +139,13 @@ describe('PerformanceMetricTracker', () =>
             PerformanceMetricTracker.start(keyTwo);
             PerformanceMetricTracker.end(keyTwo);
 
-            expect(PerformanceMetricTracker.averageDuration).toEqual(
+            expect(PerformanceMetricTracker[valueToCheck]).toEqual(
                 (
-                    (endTimeOne - startTimeOne)
-                    + (endTimeTwo - startTimeTwo)
-                ) / 2,
+                    (
+                        (endTimeOne - startTimeOne)
+                        + (endTimeTwo - startTimeTwo)
+                    ) / 2 // (2 = the number of entries)
+                ) / expectedResultDivisor,
             );
         });
     });
