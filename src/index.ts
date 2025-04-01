@@ -6,6 +6,12 @@ import fs from 'node:fs';
 import { AiPdfReader } from './services/AiPdfReader.js';
 import { Gen9PokemonParser, type Gen9PokemonParserResponse } from './services/Gen9PokemonParser.js';
 
+// Create JSON output directory
+if (process.env.SAVE_TO_JSON_FILE === 'true' && !fs.existsSync('./json'))
+{
+    fs.mkdirSync('./json');
+}
+
 const numOfPokemonPerBatch = parseInt(process.env.NUM_OF_POKEMON_PER_PATCH as string, 10);
 
 const pages = await AiPdfReader.read('pdfs/Gen 9 Homebrew - Pokemon Only.pdf');
