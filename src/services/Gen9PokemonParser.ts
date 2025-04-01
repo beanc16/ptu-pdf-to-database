@@ -1,8 +1,9 @@
-import { ChatOpenAI } from '@langchain/openai';
 import { z } from 'zod';
 
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
+import { getLlm } from '../helpers.js';
+import { Pokemon } from '../dal/types/Responses.js';
 
 export type Gen9PokemonParserResponse = z.infer<typeof Gen9PokemonParser['schema']>;
 
@@ -117,10 +118,7 @@ export class Gen9PokemonParser
         })
     });
 
-    private static llm = new ChatOpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-        model: 'gpt-4o-mini',
-    }).withStructuredOutput(this.schema);
+    private static llm = getLlm(this.schema);
 
     private static get systemInstructions()
     {
@@ -149,5 +147,11 @@ Return only the structured JSON output without extra commentary.`;
         const chain = promptTemplate.pipe(this.llm);
 
         return await chain.invoke({});
+    }
+
+    public static async translate(_data: Gen9PokemonParserResponse[]): Promise<Pokemon[]>
+    {
+        // TODO: Add translation logic
+        return [];
     }
 }
