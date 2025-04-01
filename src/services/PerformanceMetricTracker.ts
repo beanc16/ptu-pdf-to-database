@@ -29,7 +29,11 @@ export class PerformanceMetricTracker
 
     public static get averageDurationInMilliseconds()
     {
-        return this.totalDuration / Object.keys(this.timestamps).length;
+        const validTimestamps = Object.values(this.timestamps).filter(
+            value => value.startTime && value.endTime
+        );
+
+        return this.totalDuration / validTimestamps.length;
     }
 
     public static get averageDurationInSeconds()
