@@ -1,6 +1,7 @@
 import { ChatOpenAI } from '@langchain/openai';
 import { z } from 'zod';
 
+/* istanbul ignore next */
 export const getLlm = (schema: z.ZodSchema) =>
 {
     const llm = new ChatOpenAI({

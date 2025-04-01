@@ -11,9 +11,10 @@ module.exports = {
         '!node_modules/**',
     ],
     coveragePathIgnorePatterns: [
-        'src/dal/PokemonController.ts',
+        'src/index.ts',
+        'src/dal/PokemonCollection.ts', // Pulled from another project, so no need to test here
+        'src/dal/PokemonController.ts', // Pulled from another project, so no need to test here
         'src/services/AiPdfReader.ts',
-        'src/services/Gen9PokemonParser.ts',
     ],
     coverageThreshold: {
         './src/services/PerformanceMetricTracker': {

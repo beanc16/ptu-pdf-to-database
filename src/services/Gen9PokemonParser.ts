@@ -9,6 +9,7 @@ export type Gen9PokemonParserResponse = z.infer<typeof Gen9PokemonParser['schema
 
 export class Gen9PokemonParser
 {
+    /* istanbul ignore next */
     private static typeSchema = z.enum([
         'Bug',
         'Dark',
@@ -30,6 +31,7 @@ export class Gen9PokemonParser
         'Water',
     ]);
 
+    /* istanbul ignore next */
     private static schema = z.object({
         name: z.string().describe('The name of the pokemon'),
         types: z.array(
@@ -118,8 +120,10 @@ export class Gen9PokemonParser
         })
     });
 
+    /* istanbul ignore next */
     private static llm = getLlm(this.schema);
 
+    /* istanbul ignore next */
     private static get systemInstructions()
     {
         return `You are an assistant that extracts structured data from unstructured Pokémon stat blocks formatted as continuous text. The input will be a raw string containing various categories of information about a Pokémon. Your task is to parse this input and return a JSON object that conforms to a structured output.
@@ -137,6 +141,7 @@ export class Gen9PokemonParser
 Return only the structured JSON output without extra commentary.`;
     }
 
+    /* istanbul ignore next */
     public static async parse(page: string): Promise<Gen9PokemonParserResponse>
     {
         const promptTemplate = ChatPromptTemplate.fromMessages([
@@ -149,7 +154,7 @@ Return only the structured JSON output without extra commentary.`;
         return await chain.invoke({});
     }
 
-    public static async translate(_data: Gen9PokemonParserResponse[]): Promise<Pokemon[]>
+    public static async translate(data: Gen9PokemonParserResponse[]): Promise<Pokemon[]>
     {
         // TODO: Add translation logic
         return [];
