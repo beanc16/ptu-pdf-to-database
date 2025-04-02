@@ -2,8 +2,11 @@ import { z } from 'zod';
 
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
-import { getLlm } from '../helpers.js';
+import type { PokemonSpecies } from 'pokedex-promise-v2';
+
 import { Pokemon } from '../dal/types/Responses.js';
+import { getLlm } from '../helpers.js';
+import { PokeApi } from './PokeApi.js';
 
 export type Gen9PokemonParserResponse = z.infer<typeof Gen9PokemonParser['schema']>;
 
@@ -154,9 +157,136 @@ Return only the structured JSON output without extra commentary.`;
         return await chain.invoke({});
     }
 
+    private static async getTranslationData(data: Gen9PokemonParserResponse[]): Promise<{
+        pokemonNameToSpecies: Record<string, PokemonSpecies>;
+        eggGroupNameToDisplayName: Record<string, string>;
+    }>
+    {
+        // Get official pokemon species data
+        const pokemonNames = data.map((cur) => cur.name);
+        const [pokemon, eggGroups] = await Promise.all([
+            PokeApi.getByNames(pokemonNames),
+            PokeApi.getEggGroups(),
+        ]);
+
+        if (!pokemon)
+        {
+            throw new Error('Failed to get Pokémon from PokeApi');
+        }
+
+        if (!eggGroups)
+        {
+            throw new Error('Failed to get Pokémon Egg Groups from PokeApi');
+        }
+
+        // Convert to maps for faster lookup
+        const pokemonNameToSpecies = pokemon.reduce<Record<string, PokemonSpecies>>((acc, cur) =>
+        {
+            acc[cur.name] = cur;
+            return acc;
+        }, {});
+        const eggGroupNameToDisplayName = eggGroups.reduce<Record<string, string>>((acc, cur) =>
+        {
+            // Egg groups in the pokemon species api are lowercase and hyphenated
+            // rather than being the display name. We want that as the key, with
+            // the display name as the value.
+            const { name, names } = cur;
+
+            // Get the english display name of the egg group
+            const { name: displayName } = names.find(({ language }) => language.name === 'en') ?? {};
+
+            if (!displayName)
+            {
+                throw new Error(`Failed to find english display name for egg group: ${name}`);
+            }
+
+            acc[name] = displayName;
+            return acc;
+        }, {});
+
+        return { pokemonNameToSpecies, eggGroupNameToDisplayName };
+    }
+
     public static async translate(data: Gen9PokemonParserResponse[]): Promise<Pokemon[]>
     {
-        // TODO: Add translation logic
-        return [];
+        const { pokemonNameToSpecies, eggGroupNameToDisplayName } = await this.getTranslationData(data);
+
+        return data.map<Pokemon>((cur, index) =>
+        {
+            const startingIndex = parseInt(process.env.START_AT_PAGE_INDEX || '0', 10);
+            const {
+                egg_groups: speciesEggGroups,
+                hatch_counter: hatchCounter,
+                pokedex_numbers: speciesPokedexNumbers,
+            } = pokemonNameToSpecies[cur.name];
+
+            const eggGroups = speciesEggGroups.map(({ name }) => eggGroupNameToDisplayName[name]);
+
+            const {
+                entry_number: nationalPokedexNumber,
+            } = speciesPokedexNumbers.find((cur) => cur.pokedex.name === 'national') || {};
+
+            const averageHatchRate = (hatchCounter === 120)
+                ? 75
+                : (hatchCounter === 40)
+                ? 25
+                : (hatchCounter === 10)
+                ? 4
+                : (hatchCounter !== null)
+                ? Math.round(hatchCounter / 2)
+                : undefined;
+
+            if (!nationalPokedexNumber)
+            {
+                console.error('Failed to find national pokedex number for', cur, pokemonNameToSpecies[cur.name]);
+                throw new Error(`Failed to find national pokedex number for ${cur.name}`);
+            }
+
+            return {
+                ...cur,
+                sizeInformation: {
+                    height: {
+                        freedom: cur.sizeInformation.height.imperial,
+                        metric: cur.sizeInformation.height.metric,
+                        ptu: cur.sizeInformation.height.ptu,
+                    },
+                    weight: {
+                        freedom: cur.sizeInformation.weight.imperial,
+                        metric: cur.sizeInformation.weight.metric,
+                        ptu: cur.sizeInformation.weight.ptu,
+                    },
+                },
+                breedingInformation: {
+                    genderRatio: {
+                        male: cur.breedingInformation.genderRatio.male,
+                        female: cur.breedingInformation.genderRatio.female,
+                        ...(cur.breedingInformation.genderRatio.none ? { none: true } : {}),
+                    },
+                    eggGroups,
+                    averageHatchRate: averageHatchRate?.toString(),
+                },
+                capabilities: {
+                    overland: cur.capabilities.overland,
+                    ...(cur.capabilities.swim ? { swim: cur.capabilities.swim } : {}),
+                    ...(cur.capabilities.sky ? { sky: cur.capabilities.sky } : {}),
+                    ...(cur.capabilities.levitate ? { levitate: cur.capabilities.levitate } : {}),
+                    ...(cur.capabilities.burrow ? { burrow: cur.capabilities.burrow } : {}),
+                    highJump: cur.capabilities.highJump,
+                    lowJump: cur.capabilities.lowJump,
+                    power: cur.capabilities.power,
+                    ...(cur.capabilities.other ? { other: [...cur.capabilities.other] } : {}),
+                },
+                moveList: {
+                    ...cur.moveList,
+                    tutorMoves: cur.moveList.tmHm, // In Gen 9, tutor moves are the same as TM/HM moves
+                    eggMoves: [],
+                },
+                metadata: {
+                    source: 'Paldea Dex',
+                    page: `p.${48 + index + startingIndex}`, // Pokemon start at page 48 in the gen 9 doc
+                    dexNumber: `#${nationalPokedexNumber.toString()}`,
+                },
+            };
+        });
     }
 }
