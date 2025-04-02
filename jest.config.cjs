@@ -15,6 +15,7 @@ module.exports = {
         'src/dal/PokemonCollection.ts', // Pulled from another project, so no need to test here
         'src/dal/PokemonController.ts', // Pulled from another project, so no need to test here
         'src/services/AiPdfReader.ts',
+        'src/services/PokeApi.ts',      // Pulled from another project, so no need to test here
     ],
     coverageThreshold: {
         './src/services/PerformanceMetricTracker': {
