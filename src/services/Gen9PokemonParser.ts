@@ -136,7 +136,7 @@ export class Gen9PokemonParser
 - Parse evolution information by recognizing stage numbers, Pokémon names, and level requirements. The first evolutionary stage should always be recorded as level 1.
 - Handle spacing and irregular formatting to ensure correct data extraction.
 - Ensure all arrays are properly structured and missing fields are either null or empty arrays, not undefined.
-- You will occasionally find a capability in the capabilities.other array called "Naturewalk" - if this exists, ensure that this is called "Naturewalk" rather than "Nature Walk".
+- You will occasionally find a capability in the capabilities.other array called "Naturewalk" - if this exists, ensure that this is called "Naturewalk" rather than "Nature Walk", and includes the words in parenthesis after it as a part of the capability name as well, with a single space between "Naturewalk" and the first parenthesis.
 
 Return only the structured JSON output without extra commentary.`;
     }
