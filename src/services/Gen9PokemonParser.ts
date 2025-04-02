@@ -228,10 +228,20 @@ Return only the structured JSON output without extra commentary.`;
 
             const averageHatchRate = (hatchCounter === 120)
                 ? 75
+                : (hatchCounter === 50)
+                ? 30
                 : (hatchCounter === 40)
                 ? 25
+                : (hatchCounter === 35)
+                ? 20
+                : (hatchCounter === 30)
+                ? 16
+                : (hatchCounter === 15)
+                ? 7
                 : (hatchCounter === 10)
                 ? 4
+                : (hatchCounter === 5)
+                ? 2
                 : (hatchCounter !== null)
                 ? Math.round(hatchCounter / 2)
                 : undefined;
