@@ -44,10 +44,10 @@ export interface Pokemon {
     habitats: string[];
     capabilities: {
         overland: number;
-        swim: number;
-        sky: number;
-        levitate: number;
-        burrow: number;
+        swim?: number;
+        sky?: number;
+        levitate?: number;
+        burrow?: number;
         highJump: number;
         lowJump: number;
         power: number;
