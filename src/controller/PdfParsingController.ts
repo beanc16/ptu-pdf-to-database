@@ -15,6 +15,9 @@ interface PdfParserResponseMap
     [PdfPath.PtuGen9Homebrew]: Gen9PokemonParserResponse;
 };
 
+const parsedDataFileName = './json/parsed-data.json';
+const translatedDataFileName = './json/translated-data.json';
+
 export class PdfParsingController
 {
     private static createJsonOutputDirectory(): void
@@ -37,6 +40,11 @@ export class PdfParsingController
 
     private static async translateDataForDal<Path extends PdfPath>(pdfPath: Path, data: PdfParserResponseMap[Path][]): Promise<Pokemon[]>
     {
+        if (process.env.SHOW_PROCESSING_LOGS === 'true')
+        {
+            console.log('\nTranslating parsed data for the database...');
+        }
+
         const resultMap: Record<PdfPath, () => Promise<Pokemon[]>> = {
             [PdfPath.PtuGen9Homebrew]: async () => await Gen9PokemonParser.translate(data),
         };
@@ -44,26 +52,41 @@ export class PdfParsingController
         return await resultMap[pdfPath]();
     }
 
-    private static getDataFromJsonFile<Path extends PdfPath>(_pdfPath: Path): PdfParserResponseMap[Path][]
+    private static getParsedDataFromJsonFile<Path extends PdfPath>(_pdfPath: Path): PdfParserResponseMap[Path][]
     {
         // Throw error if JSON file does not exist
-        if (!fs.existsSync('./json/current-batch.json'))
+        if (!fs.existsSync(parsedDataFileName))
         {
             throw new Error('JSON file does not exist');
         }
 
         // Get data from JSON file
-        const file = fs.readFileSync('json/current-batch.json', 'utf8');
+        const file = fs.readFileSync(parsedDataFileName, 'utf8');
         const data = JSON.parse(file) as PdfParserResponseMap[Path][];
 
         return data;
     }
 
-    private static saveToJsonFile<Element>(data: Element[]): void
+    private static getTranslatedDataFromJsonFile(): Pokemon[]
+    {
+        // Throw error if JSON file does not exist
+        if (!fs.existsSync(translatedDataFileName))
+        {
+            throw new Error('JSON file does not exist');
+        }
+
+        // Get data from JSON file
+        const file = fs.readFileSync(translatedDataFileName, 'utf8');
+        const data = JSON.parse(file) as Pokemon[];
+
+        return data;
+    }
+
+    private static saveToJsonFile<Element>(fileName: string, data: Element[]): void
     {
         if (process.env.SAVE_TO_JSON_FILE === 'true' && fs.existsSync('./json'))
         {
-            fs.writeFileSync('./json/current-batch.json', JSON.stringify(data, null, 2));
+            fs.writeFileSync(fileName, JSON.stringify(data, null, 2));
         }
     }
 
@@ -164,7 +187,7 @@ export class PdfParsingController
             PerformanceMetricTracker.end(index);
 
             // Save to JSON file
-            this.saveToJsonFile(results);
+            this.saveToJsonFile(parsedDataFileName, results);
 
             numOfPagesProcessed += 1;
         }
@@ -173,7 +196,24 @@ export class PdfParsingController
         this.logPostProcessingInformation({ startingIndex, endingIndex });
     }
 
-    private static async saveJsonToDatabase<Path extends PdfPath>(pdfPath: Path): Promise<void>
+    private static async translateJsonForDatabase<Path extends PdfPath>(pdfPath: Path): Promise<void>
+    {
+        if (process.env.SAVE_TO_JSON_FILE !== 'true')
+        {
+            return;
+        }
+
+        // Get data from JSON file
+        const data = this.getParsedDataFromJsonFile(pdfPath);
+
+        // Translate data
+        const translatedData = await this.translateDataForDal(pdfPath, data);
+
+        // Save translated data to JSON file
+        this.saveToJsonFile(translatedDataFileName, translatedData);
+    }
+
+    private static async saveJsonToDatabase(): Promise<void>
     {
         if (process.env.SAVE_TO_DATABASE !== 'true')
         {
@@ -183,19 +223,15 @@ export class PdfParsingController
         // TODO: Prompt for human verification of data before saving to database
 
         // Get data from JSON file
-        const data = this.getDataFromJsonFile(pdfPath);
+        const data = this.getTranslatedDataFromJsonFile();
 
-        // Translate data
-        const translatedData = await this.translateDataForDal(pdfPath, data);
-
-        // Save data to database
-        // TODO
-        console.log('\n translatedData:', translatedData);
+        // TODO: Save data to database
     }
 
     public static async convertPdfToDatabase(pdfPath: PdfPath): Promise<void>
     {
         await this.convertPdfToJson(pdfPath);
-        await this.saveJsonToDatabase(pdfPath);
+        await this.translateJsonForDatabase(pdfPath);
+        await this.saveJsonToDatabase();
     }
 }
