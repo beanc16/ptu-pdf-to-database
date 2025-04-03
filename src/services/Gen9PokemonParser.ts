@@ -177,7 +177,7 @@ Return only the structured JSON output without extra commentary.`;
     private static async getTranslationData(data: Pick<Gen9PokemonParserResponse, 'name'>[]): Promise<GetTranslationDataResponse>
     {
         // Get official pokemon species data
-        const pokemonNames = data.map((cur) => cur.name);
+        const pokemonNames = data.map((cur) => this.translatePokemonName(cur.name));
         const [pokemon, eggGroups] = await Promise.all([
             PokeApi.getByNames(pokemonNames),
             PokeApi.getEggGroups(),
@@ -230,7 +230,7 @@ Return only the structured JSON output without extra commentary.`;
             egg_groups: speciesEggGroups,
             hatch_counter: hatchCounter,
             pokedex_numbers: speciesPokedexNumbers,
-        } = pokemonNameToSpecies[pokemon.name.toLowerCase()];
+        } = pokemonNameToSpecies[PokeApi.parseName(this.translatePokemonName(pokemon.name)) as string];
 
         const eggGroups = speciesEggGroups.map(({ name }) => eggGroupNameToDisplayName[name]);
 
