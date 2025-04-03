@@ -31,9 +31,13 @@ export const getFakeTranslateInput = ({
     capabilities = {
         ...defaultCapabilities,
     },
+    maleRatio = 50,
+    femaleRatio = 50,
     shouldBeGenderless = false,
 }: {
     capabilities?: NonNullable<Partial<Gen9PokemonParserResponse['capabilities']>>;
+    maleRatio?: number;
+    femaleRatio?: number;
     shouldBeGenderless?: boolean;
 } = {}): Gen9PokemonParserResponse[] =>
 {
@@ -121,8 +125,8 @@ export const getFakeTranslateInput = ({
                 ...(shouldBeGenderless
                     ? { none: true }
                     : {
-                        male: 50,
-                        female: 50,
+                        male: maleRatio,
+                        female: femaleRatio,
                     }
                 ),
             },

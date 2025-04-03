@@ -361,6 +361,19 @@ describe('Gen9PokemonParser', () =>
                 });
             });
 
+            it('should mark Pokémon as genderless if male/female gender ratio does not add up to 100%', async () =>
+            {
+                const input = getFakeTranslateInput({ maleRatio: 0, femaleRatio: 0 });
+                const response = await Gen9PokemonParser.translate(input);
+
+                response.forEach((pokemon) =>
+                {
+                    expect(pokemon.breedingInformation.genderRatio).toEqual({
+                        none: true,
+                    });
+                });
+            });
+
             it.each(
                 [
                     ['swim', 1],

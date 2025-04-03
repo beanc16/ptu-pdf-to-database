@@ -328,6 +328,18 @@ Return only the structured JSON output without extra commentary.`;
                 throw new Error(`Failed to find national pokedex number for ${cur.name}`, { cause: translationData.pokemonNameToSpecies[cur.name] });
             }
 
+            let genderRatio = {
+                ...('male' in cur.breedingInformation.genderRatio ? { male: cur.breedingInformation.genderRatio.male } : {}),
+                ...('female' in cur.breedingInformation.genderRatio ? { female: cur.breedingInformation.genderRatio.female } : {}),
+                ...(('none' in cur.breedingInformation.genderRatio && cur.breedingInformation.genderRatio.none) ? { none: cur.breedingInformation.genderRatio.none } : {}),
+            };
+            if (genderRatio.male !== undefined && genderRatio.female !== undefined && genderRatio.male + genderRatio.female !== 100)
+            {
+                genderRatio = {
+                    none: true,
+                };
+            }
+
             return {
                 ...cur,
                 sizeInformation: {
@@ -343,11 +355,7 @@ Return only the structured JSON output without extra commentary.`;
                     },
                 },
                 breedingInformation: {
-                    genderRatio: {
-                        ...('male' in cur.breedingInformation.genderRatio ? { male: cur.breedingInformation.genderRatio.male } : {}),
-                        ...('female' in cur.breedingInformation.genderRatio ? { female: cur.breedingInformation.genderRatio.female } : {}),
-                        ...(('none' in cur.breedingInformation.genderRatio && cur.breedingInformation.genderRatio.none) ? { none: cur.breedingInformation.genderRatio.none } : {}),
-                    },
+                    genderRatio,
                     eggGroups,
                     averageHatchRate: `${averageHatchRate?.toString()} Days`,
                 },
