@@ -18,7 +18,7 @@ module.exports = {
         'src/services/PokeApi.ts',      // Pulled from another project, so no need to test here
     ],
     coverageThreshold: {
-        './src/services/PerformanceMetricTracker': {
+        './src/services': {
             statements: 100,
             branches: 100,
             functions: 100,
