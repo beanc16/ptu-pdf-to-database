@@ -58,6 +58,7 @@ export class PokeApi
             .replaceAll('tauros-paldea-aqua-breed', 'tauros')   // For pokemon-species only, not pokemon
             .replaceAll('tauros-paldea-blaze-breed', 'tauros')  // For pokemon-species only, not pokemon
             .replaceAll('tauros-paldea-combat-breed', 'tauros') // For pokemon-species only, not pokemon
+            .replaceAll('ursaluna-bloodmoon', 'ursaluna')
             .replaceAll('wishiwashi-schooling', 'wishiwashi-school')
             .replaceAll('wooper-paldea', 'wooper')              // For pokemon-species only, not pokemon
             .replaceAll('zacian-crowned-sword', 'zacian-crowned')
