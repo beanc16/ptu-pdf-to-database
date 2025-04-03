@@ -85,13 +85,14 @@ export class PdfParsingController
         }
 
         const { averageDurationInSeconds, averageDurationInMinutes } = PerformanceMetricTracker;
+        const totalPages = endingIndex - startingIndex;
+
         console.log('\nParsing...');
 
         // Log estimated time remaining for each batch after the first
         if (index > startingIndex)
         {
             const currentPage = index - startingIndex;
-            const totalPages = endingIndex - startingIndex;
             const remainingPages = totalPages - numOfPagesProcessed;
             const remainingSeconds = (averageDurationInSeconds * remainingPages).toFixed(1);
             const remainingMinutes = (averageDurationInMinutes * remainingPages).toFixed(1);
@@ -101,6 +102,10 @@ export class PdfParsingController
                 `Estimated Page Processing Time: ${averageDurationInSeconds.toFixed(1)}secs`,
                 `Estimated Remaining Total Processing Time: ${remainingMinutes}mins | ${remainingSeconds}secs`,
             ].join('\n'));
+        }
+        else
+        {
+            console.log(`Pages Processed: 0/${totalPages} (${totalPages} pages remaining)`);
         }
     }
 
