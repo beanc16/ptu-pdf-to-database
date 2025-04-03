@@ -107,17 +107,40 @@ describe('Gen9PokemonParser', () =>
         });
     });
 
-    describe('formatOtherCapabilities', () =>
+    describe('translatePokemonName', () =>
+    {
+
+        it.each([
+            ['Oinkologne (Male)', 'OinkologneMale'],
+            ['Oinkologne (Female)', 'OinkologneFemale'],
+            ['Oinkologne (Female)', 'OinkologneFemale'],
+            ['Palafin (Zero)', 'PalafinZeroForm'],
+            ['Palafin (Hero)', 'PalafinHeroForm'],
+            ['Tauros (Paldean Aqua Breed)', 'PaldeanTaurosAquaBreed'],
+            ['Tauros (Paldean Blaze Breed)', 'PaldeanTaurosBlazeBreed'],
+            ['Tauros (Paldean Combat Breed)', 'PaldeanTaurosCombatBreed'],
+            ['Wooper (Paldean)', 'PaldeanWooper'],
+            ['Scream Tail', 'ScreamTail'],
+            ['Many Capitalized Letters', 'ManyCapitalizedLetters'],
+        ])(`should overwrite Pokémon's name to be '%s' if it's '%s'`, (expectedResult, pokemonName) =>
+        {
+            const response = Gen9PokemonParser['translatePokemonName'](pokemonName);
+
+            expect(response).toEqual(expectedResult);
+        });
+    });
+
+    describe('translateOtherCapabilities', () =>
     {
         it('should output an empty array if no other capabilities are given', () =>
         {
-            const result = Gen9PokemonParser['formatOtherCapabilities']([]);
+            const result = Gen9PokemonParser['translateOtherCapabilities']([]);
             expect(result).toEqual([]);
         });
 
         it('should output the input array if a Naturewalk capability is not given', () =>
         {
-            const result = Gen9PokemonParser['formatOtherCapabilities']([
+            const result = Gen9PokemonParser['translateOtherCapabilities']([
                 'Underdog',
                 'Firestarter',
                 'Egg Warmer',
@@ -127,7 +150,7 @@ describe('Gen9PokemonParser', () =>
 
         it('should format Naturewalk capability with proper spacing', () =>
         {
-            const result = Gen9PokemonParser['formatOtherCapabilities']([
+            const result = Gen9PokemonParser['translateOtherCapabilities']([
                 'Naturewalk (Mountain)',                    // One proper format
                 'Naturewalk (Forest, Grasslands)',          // Two proper formats
                 'Naturewalk(Mountain)',                     // One improper format
@@ -177,7 +200,7 @@ describe('Gen9PokemonParser', () =>
 
         it('should handle a mix of Naturewalk and non-Naturewalk capabilities', () =>
         {
-            const result = Gen9PokemonParser['formatOtherCapabilities']([
+            const result = Gen9PokemonParser['translateOtherCapabilities']([
                 'Naturewalk(Forest,Grasslands)',
                 'Underdog',
                 'Firestarter',
@@ -197,7 +220,7 @@ describe('Gen9PokemonParser', () =>
 
         it('should handle edge cases with extra spaces and capitalization', () =>
         {
-            const result = Gen9PokemonParser['formatOtherCapabilities']([
+            const result = Gen9PokemonParser['translateOtherCapabilities']([
                 'nATuRewaLk  (  foREsT,  grAsSlaNDs  )',
             ]);
             expect(result).toEqual([
@@ -346,20 +369,6 @@ describe('Gen9PokemonParser', () =>
                         dexNumber: `#${mockedParsePokemonTranslationDataResponse.nationalPokedexNumber.toString()}`,
                     },
                 } as Pokemon]);
-            });
-
-            it.each([
-                ['Male', 'OinkologneMale'],
-                ['Female', 'OinkologneFemale'],
-            ])(`should overwrite Pokémon's name to be 'Oinkologne (%s)' if it's '%s'`, async (expectedGender, pokemonName) =>
-            {
-                const input = getFakeTranslateInput({ name: pokemonName });
-                const response = await Gen9PokemonParser.translate(input);
-
-                response.forEach((pokemon) =>
-                {
-                    expect(pokemon.name).toEqual(`Oinkologne (${expectedGender})`);
-                });
             });
 
             it('should not include male/female gender ratio if the Pokémon is genderless', async () =>

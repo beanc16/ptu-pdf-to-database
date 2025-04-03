@@ -284,7 +284,52 @@ Return only the structured JSON output without extra commentary.`;
         return output;
     }
 
-    private static formatOtherCapabilities(otherCapabilities: string[]): string[]
+    private static translatePokemonName(name: string): string
+    {
+        if (name.toLowerCase().includes('oinkolognemale'))
+        {
+            return 'Oinkologne (Male)';
+        }
+
+        if (name.toLowerCase().includes('oinkolognefemale'))
+        {
+            return 'Oinkologne (Female)';
+        }
+
+        if (name.toLowerCase().includes('palafinzero'))
+        {
+            return 'Palafin (Zero)';
+        }
+
+        if (name.toLowerCase().includes('palafinhero'))
+        {
+            return 'Palafin (Hero)';
+        }
+
+        if (name.toLowerCase().includes('paldeantaurosaquabreed'))
+        {
+            return 'Tauros (Paldean Aqua Breed)';
+        }
+
+        if (name.toLowerCase().includes('paldeantaurosblazebreed'))
+        {
+            return 'Tauros (Paldean Blaze Breed)';
+        }
+
+        if (name.toLowerCase().includes('paldeantauroscombatbreed'))
+        {
+            return 'Tauros (Paldean Combat Breed)';
+        }
+
+        if (name.toLowerCase().includes('paldeanwooper'))
+        {
+            return 'Wooper (Paldean)';
+        }
+
+        return name.replaceAll(/([a-z])([A-Z])/g, '$1 $2').trim();
+    }
+
+    private static translateOtherCapabilities(otherCapabilities: string[]): string[]
     {
         return otherCapabilities.map((cur) =>
         {
@@ -342,11 +387,7 @@ Return only the structured JSON output without extra commentary.`;
             }
 
             return {
-                name: curName.toLowerCase().includes('oinkolognemale')
-                    ? 'Oinkologne (Male)'
-                    : curName.toLowerCase().includes('oinkolognefemale')
-                    ? 'Oinkologne (Female)'
-                    : curName,
+                name: this.translatePokemonName(curName),
                 ...remainingCurProperties,
                 sizeInformation: {
                     height: {
@@ -374,7 +415,7 @@ Return only the structured JSON output without extra commentary.`;
                     highJump: cur.capabilities.highJump,
                     lowJump: cur.capabilities.lowJump,
                     power: cur.capabilities.power,
-                    ...(cur.capabilities.other ? { other: [...this.formatOtherCapabilities(cur.capabilities.other)] } : {}),
+                    ...(cur.capabilities.other ? { other: [...this.translateOtherCapabilities(cur.capabilities.other)] } : {}),
                 },
                 moveList: {
                     ...cur.moveList,
