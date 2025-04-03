@@ -315,6 +315,7 @@ Return only the structured JSON output without extra commentary.`;
 
         return data.map<Pokemon>((cur, index) =>
         {
+            const { name: curName, ...remainingCurProperties } = cur;
             const startingIndex = parseInt(process.env.START_AT_PAGE_INDEX || '0', 10);
 
             const {
@@ -325,7 +326,7 @@ Return only the structured JSON output without extra commentary.`;
 
             if (nationalPokedexNumber === undefined)
             {
-                throw new Error(`Failed to find national pokedex number for ${cur.name}`, { cause: translationData.pokemonNameToSpecies[cur.name] });
+                throw new Error(`Failed to find national pokedex number for ${curName}`, { cause: translationData.pokemonNameToSpecies[cur.name] });
             }
 
             let genderRatio = {
@@ -341,7 +342,12 @@ Return only the structured JSON output without extra commentary.`;
             }
 
             return {
-                ...cur,
+                name: curName.toLowerCase().includes('oinkolognemale')
+                    ? 'Oinkologne (Male)'
+                    : curName.toLowerCase().includes('oinkolognefemale')
+                    ? 'Oinkologne (Female)'
+                    : curName,
+                ...remainingCurProperties,
                 sizeInformation: {
                     height: {
                         freedom: cur.sizeInformation.height.imperial,

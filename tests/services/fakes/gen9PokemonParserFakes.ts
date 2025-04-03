@@ -28,6 +28,7 @@ const defaultCapabilities = {
 };
 
 export const getFakeTranslateInput = ({
+    name = 'pikachu',
     capabilities = {
         ...defaultCapabilities,
     },
@@ -35,6 +36,7 @@ export const getFakeTranslateInput = ({
     femaleRatio = 50,
     shouldBeGenderless = false,
 }: {
+    name?: string;
     capabilities?: NonNullable<Partial<Gen9PokemonParserResponse['capabilities']>>;
     maleRatio?: number;
     femaleRatio?: number;
@@ -42,7 +44,7 @@ export const getFakeTranslateInput = ({
 } = {}): Gen9PokemonParserResponse[] =>
 {
     return [{
-        name: 'pikachu',
+        name,
         types: ['Electric'],
         baseStats: {
             hp: 4,

@@ -348,6 +348,20 @@ describe('Gen9PokemonParser', () =>
                 } as Pokemon]);
             });
 
+            it.each([
+                ['Male', 'OinkologneMale'],
+                ['Female', 'OinkologneFemale'],
+            ])(`should overwrite Pokémon's name to be 'Oinkologne (%s)' if it's '%s'`, async (expectedGender, pokemonName) =>
+            {
+                const input = getFakeTranslateInput({ name: pokemonName });
+                const response = await Gen9PokemonParser.translate(input);
+
+                response.forEach((pokemon) =>
+                {
+                    expect(pokemon.name).toEqual(`Oinkologne (${expectedGender})`);
+                });
+            });
+
             it('should not include male/female gender ratio if the Pokémon is genderless', async () =>
             {
                 const input = getFakeTranslateInput({ shouldBeGenderless: true });
