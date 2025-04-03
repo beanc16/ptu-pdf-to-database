@@ -151,7 +151,7 @@ export class Gen9PokemonParser
 ## Parsing Rules
 - Recognize headers like "BaseStats", "Capabilities", "SkillList", and "MoveList" to categorize data correctly.
 - Convert stat values and numerical fields to integers where applicable.
-- If you find an unlabeled number in the middle of other stats, that is the pokemon's base stat total, which should remain unused and not be in the output.
+- If you find an unlabeled number in the middle of other stats, that is the pokemon's base stat total, which should remain unused and not be in the output. Additionally, all base stats should only ever be single or double digit numbers.
 - Extract move levels properly, ensuring move names and types are correctly mapped. Some levels may be recorded as the string, "Evo", rather than a number to signal that the move is learned upon evolution.
 - Parse evolution information by recognizing stage numbers, Pokémon names, and level requirements. The first evolutionary stage should always be recorded as level 1.
 - Handle spacing and irregular formatting to ensure correct data extraction.
