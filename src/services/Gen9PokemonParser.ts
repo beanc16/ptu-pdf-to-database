@@ -196,7 +196,7 @@ Return only the structured JSON output without extra commentary.`;
         // Convert to maps for faster lookup
         const pokemonNameToSpecies = pokemon.reduce<Record<string, PokemonSpecies>>((acc, cur) =>
         {
-            acc[cur.name] = cur;
+            acc[cur.name.toLowerCase()] = cur;
             return acc;
         }, {});
         const eggGroupNameToDisplayName = eggGroups.reduce<Record<string, string>>((acc, cur) =>
@@ -230,7 +230,7 @@ Return only the structured JSON output without extra commentary.`;
             egg_groups: speciesEggGroups,
             hatch_counter: hatchCounter,
             pokedex_numbers: speciesPokedexNumbers,
-        } = pokemonNameToSpecies[pokemon.name];
+        } = pokemonNameToSpecies[pokemon.name.toLowerCase()];
 
         const eggGroups = speciesEggGroups.map(({ name }) => eggGroupNameToDisplayName[name]);
 
