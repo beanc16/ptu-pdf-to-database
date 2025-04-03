@@ -107,6 +107,105 @@ describe('Gen9PokemonParser', () =>
         });
     });
 
+    describe('formatOtherCapabilities', () =>
+    {
+        it('should output an empty array if no other capabilities are given', () =>
+        {
+            const result = Gen9PokemonParser['formatOtherCapabilities']([]);
+            expect(result).toEqual([]);
+        });
+
+        it('should output the input array if a Naturewalk capability is not given', () =>
+        {
+            const result = Gen9PokemonParser['formatOtherCapabilities']([
+                'Underdog',
+                'Firestarter',
+                'Egg Warmer',
+            ]);
+            expect(result).toEqual(['Underdog', 'Firestarter', 'Egg Warmer']);
+        });
+
+        it('should format Naturewalk capability with proper spacing', () =>
+        {
+            const result = Gen9PokemonParser['formatOtherCapabilities']([
+                'Naturewalk (Mountain)',                    // One proper format
+                'Naturewalk (Forest, Grasslands)',          // Two proper formats
+                'Naturewalk(Mountain)',                     // One improper format
+                'Naturewalk(Forest,Grasslands)',            // Two improper formats
+                'Naturewalk (Forest,Grasslands)',           // Two mixed improper formats
+                'Naturewalk(Forest, Grasslands)',           // Two mixed improper formats
+                'Naturewalk (Forest, Grasslands, Mountain)',// Three proper formats
+                'Naturewalk(Forest,Grasslands,Mountain)',   // Three improper formats
+                'Naturewalk (Forest,Grasslands,Mountain)',  // Three mixed improper formats
+                'Naturewalk( Forest,Grasslands,Mountain)',  // Three improper formats
+                'Naturewalk(Forest, Grasslands,Mountain)',  // Three mixed improper formats
+                'Naturewalk(Forest,Grasslands, Mountain)',  // Three mixed improper formats
+                'Naturewalk(Forest,Grasslands,Mountain )',  // Three mixed improper formats
+                'Naturewalk ( Forest,Grasslands,Mountain)', // Three mixed improper formats
+                'Naturewalk (Forest, Grasslands,Mountain)', // Three mixed improper formats
+                'Naturewalk (Forest,Grasslands, Mountain)', // Three mixed improper formats
+                'Naturewalk (Forest,Grasslands,Mountain )', // Three mixed improper formats
+                'Naturewalk ( Forest, Grasslands,Mountain)',// Three mixed improper formats
+                'Naturewalk ( Forest,Grasslands, Mountain)',// Three mixed improper formats
+                'Naturewalk (Forest, Grasslands, Mountain)',// Three mixed improper formats
+                // 'Naturewalk   (  Forest,  Grasslands  )',   // Two mixed improper formats with extra spacing
+            ]);
+            expect(result).toEqual([
+                'Naturewalk (Mountain)',
+                'Naturewalk (Forest, Grasslands)',
+                'Naturewalk (Mountain)',
+                'Naturewalk (Forest, Grasslands)',
+                'Naturewalk (Forest, Grasslands)',
+                'Naturewalk (Forest, Grasslands)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                'Naturewalk (Forest, Grasslands, Mountain)',
+                // 'Naturewalk (Forest, Grasslands)',
+            ]);
+        });
+
+        it('should handle a mix of Naturewalk and non-Naturewalk capabilities', () =>
+        {
+            const result = Gen9PokemonParser['formatOtherCapabilities']([
+                'Naturewalk(Forest,Grasslands)',
+                'Underdog',
+                'Firestarter',
+                'Naturewalk(Mountain)',
+                'Egg Warmer',
+                'Naturewalk (Mountain)',
+            ]);
+            expect(result).toEqual([
+                'Naturewalk (Forest, Grasslands)',
+                'Underdog',
+                'Firestarter',
+                'Naturewalk (Mountain)',
+                'Egg Warmer',
+                'Naturewalk (Mountain)',
+            ]);
+        });
+
+        it('should handle edge cases with extra spaces and capitalization', () =>
+        {
+            const result = Gen9PokemonParser['formatOtherCapabilities']([
+                'nATuRewaLk  (  foREsT,  grAsSlaNDs  )',
+            ]);
+            expect(result).toEqual([
+                'Naturewalk (Forest, Grasslands)',
+            ]);
+        });
+    });
+
     describe('parsePokemonTranslationData', () =>
     {
         it('should correctly parse Pokémon translation data', () =>

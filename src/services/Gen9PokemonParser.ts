@@ -284,6 +284,31 @@ Return only the structured JSON output without extra commentary.`;
         return output;
     }
 
+    private static formatOtherCapabilities(otherCapabilities: string[]): string[]
+    {
+        return otherCapabilities.map((cur) =>
+        {
+            if (!cur.toLowerCase().includes('naturewalk'))
+            {
+                return cur;
+            }
+
+            const capitalizeWord = (word: string): string =>
+            {
+                const trimmedItem = word.trim();
+                return trimmedItem.charAt(0).toUpperCase() + trimmedItem.toLowerCase().slice(1);
+            };
+
+            // Add spaces after opening parenthesis and between each comma for naturewalk capability if they don't already exist
+            return cur.replace(/(\w+)[\s]*\(([^)]+)\)/g, (_match, prefix, contents: string) =>
+            {
+                // Add spaces after commas in the contents
+                const formattedContents = contents.split(',').map(capitalizeWord).join(', ');
+                return `${capitalizeWord(prefix)} (${formattedContents})`;
+            });
+        });
+    }
+
     public static async translate(data: Gen9PokemonParserResponse[]): Promise<Pokemon[]>
     {
         const translationData = await this.getTranslationData(data);
@@ -335,7 +360,7 @@ Return only the structured JSON output without extra commentary.`;
                     highJump: cur.capabilities.highJump,
                     lowJump: cur.capabilities.lowJump,
                     power: cur.capabilities.power,
-                    ...(cur.capabilities.other ? { other: [...cur.capabilities.other] } : {}),
+                    ...(cur.capabilities.other ? { other: [...this.formatOtherCapabilities(cur.capabilities.other)] } : {}),
                 },
                 moveList: {
                     ...cur.moveList,
