@@ -50,10 +50,16 @@ export class PokeApi
             .replaceAll('necrozma-dusk-mane', 'necrozma-dusk')
             .replaceAll('nidoran-female', 'nidoran-f')
             .replaceAll('nidoran-male', 'nidoran-m')
-            .replaceAll('oinkologne-female', 'oinkologne') // For pokemon-species only, not pokemon
-            .replaceAll('oinkologne-male', 'oinkologne')   // For pokemon-species only, not pokemon
+            .replaceAll('oinkologne-female', 'oinkologne')      // For pokemon-species only, not pokemon
+            .replaceAll('oinkologne-male', 'oinkologne')        // For pokemon-species only, not pokemon
             .replaceAll('oricorio', 'oricorio-baile')
+            .replaceAll('palafin-hero', 'palafin')              // For pokemon-species only, not pokemon
+            .replaceAll('palafin-zero', 'palafin')              // For pokemon-species only, not pokemon
+            .replaceAll('tauros-paldea-aqua-breed', 'tauros')   // For pokemon-species only, not pokemon
+            .replaceAll('tauros-paldea-blaze-breed', 'tauros')  // For pokemon-species only, not pokemon
+            .replaceAll('tauros-paldea-combat-breed', 'tauros') // For pokemon-species only, not pokemon
             .replaceAll('wishiwashi-schooling', 'wishiwashi-school')
+            .replaceAll('wooper-paldea', 'wooper')              // For pokemon-species only, not pokemon
             .replaceAll('zacian-crowned-sword', 'zacian-crowned')
             .replaceAll('zamazenta-crowned-shield', 'zamazenta-crowned')
             .replaceAll('zacian-hero', 'zacian')
