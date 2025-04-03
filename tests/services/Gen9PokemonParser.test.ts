@@ -130,6 +130,51 @@ describe('Gen9PokemonParser', () =>
         });
     });
 
+    describe('translateBaseStats', () =>
+    {
+        it('should not change base stats below 100', () =>
+        {
+            const result = Gen9PokemonParser['translateBaseStats']({
+                hp: 50,
+                attack: 50,
+                defense: 50,
+                specialAttack: 50,
+                specialDefense: 50,
+                speed: 50,
+            });
+
+            expect(result).toEqual({
+                hp: 50,
+                attack: 50,
+                defense: 50,
+                specialAttack: 50,
+                specialDefense: 50,
+                speed: 50,
+            });
+        });
+
+        it('should remove third digit from base stats above 100', () =>
+        {
+            const result = Gen9PokemonParser['translateBaseStats']({
+                hp: 101,
+                attack: 121,
+                defense: 151,
+                specialAttack: 171,
+                specialDefense: 191,
+                speed: 13,
+            });
+
+            expect(result).toEqual({
+                hp: 10,
+                attack: 12,
+                defense: 15,
+                specialAttack: 17,
+                specialDefense: 19,
+                speed: 13,
+            });
+        });
+    });
+
     describe('translateOtherCapabilities', () =>
     {
         it('should output an empty array if no other capabilities are given', () =>

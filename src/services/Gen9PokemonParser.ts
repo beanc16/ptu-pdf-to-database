@@ -329,6 +329,26 @@ Return only the structured JSON output without extra commentary.`;
         return name.replaceAll(/([a-z])([A-Z])/g, '$1 $2').trim();
     }
 
+    private static translateBaseStats(baseStats: Gen9PokemonParserResponse['baseStats']): Gen9PokemonParserResponse['baseStats']
+    {
+        return Object.entries(baseStats).reduce<Gen9PokemonParserResponse['baseStats']>((acc, entry) =>
+        {
+            const [key, value] = entry as [keyof Gen9PokemonParserResponse['baseStats'], number];
+
+            // 3-digit numbers are parsing errors, it should only be the first two numbers
+            if (value > 99)
+            {
+                acc[key] = Math.floor(value / 10);
+            }
+            else
+            {
+                acc[key] = value;
+            }
+
+            return acc;
+        }, {} as any);
+    }
+
     private static translateOtherCapabilities(otherCapabilities: string[]): string[]
     {
         return otherCapabilities.map((cur) =>
@@ -360,7 +380,7 @@ Return only the structured JSON output without extra commentary.`;
 
         return data.map<Pokemon>((cur, index) =>
         {
-            const { name: curName, ...remainingCurProperties } = cur;
+            const { name: curName, baseStats, ...remainingCurProperties } = cur;
             const startingIndex = parseInt(process.env.START_AT_PAGE_INDEX || '0', 10);
 
             const {
@@ -389,6 +409,7 @@ Return only the structured JSON output without extra commentary.`;
             return {
                 name: this.translatePokemonName(curName),
                 ...remainingCurProperties,
+                baseStats: this.translateBaseStats(baseStats),
                 sizeInformation: {
                     height: {
                         freedom: cur.sizeInformation.height.imperial,
