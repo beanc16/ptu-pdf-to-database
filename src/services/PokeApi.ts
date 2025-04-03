@@ -50,6 +50,8 @@ export class PokeApi
             .replaceAll('necrozma-dusk-mane', 'necrozma-dusk')
             .replaceAll('nidoran-female', 'nidoran-f')
             .replaceAll('nidoran-male', 'nidoran-m')
+            .replaceAll('oinkologne-female', 'oinkologne') // For pokemon-species only, not pokemon
+            .replaceAll('oinkologne-male', 'oinkologne')   // For pokemon-species only, not pokemon
             .replaceAll('oricorio', 'oricorio-baile')
             .replaceAll('wishiwashi-schooling', 'wishiwashi-school')
             .replaceAll('zacian-crowned-sword', 'zacian-crowned')
