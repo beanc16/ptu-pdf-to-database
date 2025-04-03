@@ -10,6 +10,19 @@ import { PokeApi } from './PokeApi.js';
 
 export type Gen9PokemonParserResponse = z.infer<typeof Gen9PokemonParser['schema']>;
 
+export interface GetTranslationDataResponse
+{
+    pokemonNameToSpecies: Record<string, PokemonSpecies>;
+    eggGroupNameToDisplayName: Record<string, string>;
+}
+
+interface ParsePokemonTranslationDataResponse
+{
+    eggGroups: string[];
+    nationalPokedexNumber: number | undefined;
+    averageHatchRate: number | undefined;
+}
+
 export class Gen9PokemonParser
 {
     /* istanbul ignore next */
@@ -105,11 +118,15 @@ export class Gen9PokemonParser
             }),
         }),
         breedingInformation: z.object({
-            genderRatio: z.object({
-                male: z.number().describe('The male percentage of the pokemon'),
-                female: z.number().describe('The female percentage of the pokemon'),
-                none: z.union([z.boolean(), z.null()]).describe('Whether the pokemon is genderless or the gender ratio is unknown'),
-            }),
+            genderRatio: z.union([
+                z.object({
+                    male: z.number().describe('The male percentage of the pokemon'),
+                    female: z.number().describe('The female percentage of the pokemon'),
+                }),
+                z.object({
+                    none: z.boolean().describe('Whether the pokemon is genderless or the gender ratio is unknown'),
+                }),
+            ]),
         }),
         diets: z.array(z.string()).describe('The diets of the pokemon'),
         habitats: z.array(z.string()).describe('The habitats of the pokemon'),
@@ -157,10 +174,7 @@ Return only the structured JSON output without extra commentary.`;
         return await chain.invoke({});
     }
 
-    private static async getTranslationData(data: Gen9PokemonParserResponse[]): Promise<{
-        pokemonNameToSpecies: Record<string, PokemonSpecies>;
-        eggGroupNameToDisplayName: Record<string, string>;
-    }>
+    private static async getTranslationData(data: Pick<Gen9PokemonParserResponse, 'name'>[]): Promise<GetTranslationDataResponse>
     {
         // Get official pokemon species data
         const pokemonNames = data.map((cur) => cur.name);
@@ -207,49 +221,86 @@ Return only the structured JSON output without extra commentary.`;
         return { pokemonNameToSpecies, eggGroupNameToDisplayName };
     }
 
+    private static parsePokemonTranslationData(
+        pokemon: Pick<Gen9PokemonParserResponse, 'name'>,
+        { pokemonNameToSpecies, eggGroupNameToDisplayName }: GetTranslationDataResponse,
+    ): ParsePokemonTranslationDataResponse
+    {
+        const {
+            egg_groups: speciesEggGroups,
+            hatch_counter: hatchCounter,
+            pokedex_numbers: speciesPokedexNumbers,
+        } = pokemonNameToSpecies[pokemon.name];
+
+        const eggGroups = speciesEggGroups.map(({ name }) => eggGroupNameToDisplayName[name]);
+
+        const {
+            entry_number: nationalPokedexNumber,
+        } = speciesPokedexNumbers.find((cur) => cur.pokedex.name === 'national') || {};
+
+        const output: ParsePokemonTranslationDataResponse = {
+            eggGroups,
+            nationalPokedexNumber,
+            averageHatchRate: undefined,
+        };
+
+        if (hatchCounter === 120)
+        {
+            output.averageHatchRate = 75;
+        }
+        else if (hatchCounter === 50)
+        {
+            output.averageHatchRate = 30;
+        }
+        else if (hatchCounter === 40)
+        {
+            output.averageHatchRate = 25;
+        }
+        else if (hatchCounter === 35)
+        {
+            output.averageHatchRate = 20;
+        }
+        else if (hatchCounter === 30)
+        {
+            output.averageHatchRate = 16;
+        }
+        else if (hatchCounter === 15)
+        {
+            output.averageHatchRate = 7;
+        }
+        else if (hatchCounter === 10)
+        {
+            output.averageHatchRate = 4;
+        }
+        else if (hatchCounter === 5)
+        {
+            output.averageHatchRate = 2;
+        }
+        else if (hatchCounter !== null)
+        {
+            output.averageHatchRate = Math.round(hatchCounter / 2);
+        }
+
+        return output;
+    }
+
     public static async translate(data: Gen9PokemonParserResponse[]): Promise<Pokemon[]>
     {
-        const { pokemonNameToSpecies, eggGroupNameToDisplayName } = await this.getTranslationData(data);
+        const translationData = await this.getTranslationData(data);
 
         return data.map<Pokemon>((cur, index) =>
         {
             const startingIndex = parseInt(process.env.START_AT_PAGE_INDEX || '0', 10);
-            const {
-                egg_groups: speciesEggGroups,
-                hatch_counter: hatchCounter,
-                pokedex_numbers: speciesPokedexNumbers,
-            } = pokemonNameToSpecies[cur.name];
-
-            const eggGroups = speciesEggGroups.map(({ name }) => eggGroupNameToDisplayName[name]);
 
             const {
-                entry_number: nationalPokedexNumber,
-            } = speciesPokedexNumbers.find((cur) => cur.pokedex.name === 'national') || {};
+                averageHatchRate,
+                eggGroups,
+                nationalPokedexNumber,
+            } = this.parsePokemonTranslationData(cur, translationData);
 
-            const averageHatchRate = (hatchCounter === 120)
-                ? 75
-                : (hatchCounter === 50)
-                ? 30
-                : (hatchCounter === 40)
-                ? 25
-                : (hatchCounter === 35)
-                ? 20
-                : (hatchCounter === 30)
-                ? 16
-                : (hatchCounter === 15)
-                ? 7
-                : (hatchCounter === 10)
-                ? 4
-                : (hatchCounter === 5)
-                ? 2
-                : (hatchCounter !== null)
-                ? Math.round(hatchCounter / 2)
-                : undefined;
-
-            if (!nationalPokedexNumber)
+            if (nationalPokedexNumber === undefined)
             {
-                console.error('Failed to find national pokedex number for', cur, pokemonNameToSpecies[cur.name]);
-                throw new Error(`Failed to find national pokedex number for ${cur.name}`);
+                throw new Error(`Failed to find national pokedex number for ${cur.name}`, { cause: translationData.pokemonNameToSpecies[cur.name] });
             }
 
             return {
@@ -268,9 +319,9 @@ Return only the structured JSON output without extra commentary.`;
                 },
                 breedingInformation: {
                     genderRatio: {
-                        male: cur.breedingInformation.genderRatio.male,
-                        female: cur.breedingInformation.genderRatio.female,
-                        ...(cur.breedingInformation.genderRatio.none ? { none: true } : {}),
+                        ...('male' in cur.breedingInformation.genderRatio ? { male: cur.breedingInformation.genderRatio.male } : {}),
+                        ...('female' in cur.breedingInformation.genderRatio ? { female: cur.breedingInformation.genderRatio.female } : {}),
+                        ...(('none' in cur.breedingInformation.genderRatio && cur.breedingInformation.genderRatio.none) ? { none: cur.breedingInformation.genderRatio.none } : {}),
                     },
                     eggGroups,
                     averageHatchRate: averageHatchRate?.toString(),
