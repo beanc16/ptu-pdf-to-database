@@ -234,7 +234,7 @@ describe('Gen9PokemonParser', () =>
                             female: (input[0].breedingInformation.genderRatio as any).female,
                         },
                         eggGroups: mockedParsePokemonTranslationDataResponse.eggGroups,
-                        averageHatchRate: mockedParsePokemonTranslationDataResponse.averageHatchRate.toString(),
+                        averageHatchRate: `${mockedParsePokemonTranslationDataResponse.averageHatchRate.toString()} Days`,
                     },
                     moveList: {
                         ...input[0].moveList,

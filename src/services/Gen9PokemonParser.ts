@@ -324,7 +324,7 @@ Return only the structured JSON output without extra commentary.`;
                         ...(('none' in cur.breedingInformation.genderRatio && cur.breedingInformation.genderRatio.none) ? { none: cur.breedingInformation.genderRatio.none } : {}),
                     },
                     eggGroups,
-                    averageHatchRate: averageHatchRate?.toString(),
+                    averageHatchRate: `${averageHatchRate?.toString()} Days`,
                 },
                 capabilities: {
                     overland: cur.capabilities.overland,
