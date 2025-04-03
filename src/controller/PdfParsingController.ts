@@ -150,7 +150,7 @@ export class PdfParsingController
     private static async convertPdfToJson(pdfPath: PdfPath): Promise<void>
     {
         // Return early if not saving to JSON
-        if (process.env.SAVE_TO_JSON_FILE !== 'true')
+        if (process.env.SKIP_PROCESSING === 'true' || process.env.SAVE_TO_JSON_FILE !== 'true')
         {
             return;
         }
