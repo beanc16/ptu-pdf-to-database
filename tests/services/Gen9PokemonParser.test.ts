@@ -175,6 +175,56 @@ describe('Gen9PokemonParser', () =>
         });
     });
 
+    describe('translateMoveList', () =>
+    {
+        it('should remove asterisks from move names', () =>
+        {
+            const result = Gen9PokemonParser['translateMoveList']({
+                levelUp: [
+                    {
+                        move: 'Spook*',
+                        level: 1,
+                        type: 'Ghost',
+                    },
+                    {
+                        move: 'Glint*',
+                        level: 15,
+                        type: 'Steel',
+                    },
+                    {
+                        move: 'Beckon*',
+                        level: 45,
+                        type: 'Ghost',
+                    },
+                ],
+                tmHm: ['Spook*', 'Glint*', 'Beckon*'],
+            });
+
+            expect(result).toEqual({
+                levelUp: [
+                    {
+                        move: 'Spook',
+                        level: 1,
+                        type: 'Ghost',
+                    },
+                    {
+                        move: 'Glint',
+                        level: 15,
+                        type: 'Steel',
+                    },
+                    {
+                        move: 'Beckon',
+                        level: 45,
+                        type: 'Ghost',
+                    },
+                ],
+                tmHm: ['Spook', 'Glint', 'Beckon'],
+                tutorMoves: ['Spook', 'Glint', 'Beckon'],
+                eggMoves: [],
+            });
+        });
+    });
+
     describe('translateOtherCapabilities', () =>
     {
         it('should output an empty array if no other capabilities are given', () =>

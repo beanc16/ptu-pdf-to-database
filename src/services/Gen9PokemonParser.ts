@@ -349,6 +349,52 @@ Return only the structured JSON output without extra commentary.`;
         }, {} as any);
     }
 
+    private static translateMoveList(moveList: Gen9PokemonParserResponse['moveList']): Pokemon['moveList']
+    {
+        const newTmHmList = moveList.tmHm.map((cur) => cur.replaceAll('*', ''));
+
+        return {
+            levelUp: moveList.levelUp.map((cur) =>
+            {
+                return {
+                    move: cur.move.replaceAll('*', ''), // * is used for custom moves
+                    level: cur.level,
+                    type: cur.type,
+                };
+            }),
+            tmHm: newTmHmList,
+            tutorMoves: newTmHmList, // In Gen 9, tutor moves are the same as TM/HM moves
+            eggMoves: [],
+        };
+    }
+
+    private static translateAbilities(abilities: Gen9PokemonParserResponse['abilities']): Pokemon['abilities']
+    {
+        // Replace unicode characters
+        return {
+            basicAbilities: abilities.basicAbilities.map((cur) => cur.replaceAll('’', `'`).replaceAll('”', '"')),
+            advancedAbilities: abilities.advancedAbilities.map((cur) => cur.replaceAll('’', `'`).replaceAll('”', '"')),
+            highAbility: abilities.highAbility.replaceAll('’', `'`).replaceAll('”', '"'),
+        };
+    }
+
+    private static translateSizeInformation(sizeInformation: Gen9PokemonParserResponse['sizeInformation']): Pokemon['sizeInformation']
+    {
+        return {
+            height: {
+                // Replace unicode characters
+                freedom: sizeInformation.height.imperial.replaceAll('’', `'`).replaceAll('”', '"'),
+                metric: sizeInformation.height.metric,
+                ptu: sizeInformation.height.ptu,
+            },
+            weight: {
+                freedom: sizeInformation.weight.imperial,
+                metric: sizeInformation.weight.metric,
+                ptu: sizeInformation.weight.ptu,
+            },
+        };
+    }
+
     private static translateOtherCapabilities(otherCapabilities: string[]): string[]
     {
         return otherCapabilities.map((cur) =>
@@ -380,7 +426,13 @@ Return only the structured JSON output without extra commentary.`;
 
         return data.map<Pokemon>((cur, index) =>
         {
-            const { name: curName, baseStats, ...remainingCurProperties } = cur;
+            const {
+                name: curName,
+                baseStats,
+                abilities,
+                moveList,
+                ...remainingCurProperties
+            } = cur;
             const startingIndex = parseInt(process.env.START_AT_PAGE_INDEX || '0', 10);
 
             const {
@@ -410,18 +462,7 @@ Return only the structured JSON output without extra commentary.`;
                 name: this.translatePokemonName(curName),
                 ...remainingCurProperties,
                 baseStats: this.translateBaseStats(baseStats),
-                sizeInformation: {
-                    height: {
-                        freedom: cur.sizeInformation.height.imperial,
-                        metric: cur.sizeInformation.height.metric,
-                        ptu: cur.sizeInformation.height.ptu,
-                    },
-                    weight: {
-                        freedom: cur.sizeInformation.weight.imperial,
-                        metric: cur.sizeInformation.weight.metric,
-                        ptu: cur.sizeInformation.weight.ptu,
-                    },
-                },
+                sizeInformation: this.translateSizeInformation(cur.sizeInformation),
                 breedingInformation: {
                     genderRatio,
                     eggGroups,
@@ -438,11 +479,8 @@ Return only the structured JSON output without extra commentary.`;
                     power: cur.capabilities.power,
                     ...(cur.capabilities.other ? { other: [...this.translateOtherCapabilities(cur.capabilities.other)] } : {}),
                 },
-                moveList: {
-                    ...cur.moveList,
-                    tutorMoves: cur.moveList.tmHm, // In Gen 9, tutor moves are the same as TM/HM moves
-                    eggMoves: [],
-                },
+                abilities: this.translateAbilities(abilities),
+                moveList: this.translateMoveList(moveList),
                 metadata: {
                     source: 'Paldea Dex',
                     page: `p.${48 + index + startingIndex}`, // Pokemon start at page 48 in the gen 9 doc
