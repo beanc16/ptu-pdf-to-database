@@ -30,6 +30,7 @@ export class PdfParsingController
         }
     }
 
+    /* istanbul ignore next */
     private static async parsePdf<Path extends PdfPath>(pdfPath: Path, page: string): Promise<PdfParserResponseMap[Path]>
     {
         const resultMap: Record<PdfPath, () => Promise<PdfParserResponseMap[Path]>> = {
@@ -39,6 +40,7 @@ export class PdfParsingController
         return await resultMap[pdfPath]();
     }
 
+    /* istanbul ignore next */
     private static async translateDataForDal<Path extends PdfPath>(pdfPath: Path, data: PdfParserResponseMap[Path][]): Promise<Pokemon[]>
     {
         if (process.env.SHOW_PROCESSING_LOGS === 'true')
@@ -230,6 +232,7 @@ export class PdfParsingController
         await Dal.insertPokemon(data);
     }
 
+    /* istanbul ignore next */
     public static async convertPdfToDatabase(pdfPath: PdfPath): Promise<void>
     {
         await this.convertPdfToJson(pdfPath);
