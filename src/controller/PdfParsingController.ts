@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import { AiPdfReader } from '../services/AiPdfReader.js';
 import { Gen9PokemonParser, type Gen9PokemonParserResponse } from '../services/Gen9PokemonParser.js';
 import { PerformanceMetricTracker } from '../services/PerformanceMetricTracker.js';
+import { Dal } from '../dal/index.js';
 import { Pokemon } from '../dal/types/Responses.js';
 
 export enum PdfPath
@@ -225,7 +226,8 @@ export class PdfParsingController
         // Get data from JSON file
         const data = this.getTranslatedDataFromJsonFile();
 
-        // TODO: Save data to database
+        // Save data to database
+        await Dal.insertPokemon(data);
     }
 
     public static async convertPdfToDatabase(pdfPath: PdfPath): Promise<void>
