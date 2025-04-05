@@ -1,4 +1,4 @@
-import type { Gen9PokemonParserResponse, GetTranslationDataResponse } from "../../../src/services/Gen9PokemonParser.js";
+import type { Gen9PokemonParserResponse, GetTranslationDataResponse } from '../../../src/services/Gen9PokemonParser.js';
 
 export const getFakePokemonTranslationData = ({
     hatchCounter = 10,

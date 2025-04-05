@@ -1,5 +1,5 @@
-import { PokemonController } from "./PokemonController.js";
-import { Pokemon } from "./types/Responses.js";
+import { PokemonController } from './PokemonController.js';
+import { Pokemon } from './types/Responses.js';
 
 export class Dal
 {
