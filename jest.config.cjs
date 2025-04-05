@@ -12,6 +12,7 @@ module.exports = {
     ],
     coveragePathIgnorePatterns: [
         'src/index.ts',
+        'src/dal/index.ts',
         'src/dal/PokemonCollection.ts', // Pulled from another project, so no need to test here
         'src/dal/PokemonController.ts', // Pulled from another project, so no need to test here
         'src/services/AiPdfReader.ts',
