@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import prompt from 'prompt';
 
 import { AiPdfReader } from '../services/AiPdfReader.js';
 import { Gen9PokemonParser, type Gen9PokemonParserResponse } from '../services/Gen9PokemonParser.js';
@@ -223,7 +224,22 @@ export class PdfParsingController
             return;
         }
 
-        // TODO: Prompt for human verification of data before saving to database
+        // Prompt for human verification of data before saving to database
+        prompt.start();
+        const { answer } = await prompt.get({
+            properties: {
+                answer: {
+                    description: 'Are you sure you want to save the data to the database? (true/false)',
+                    type: 'boolean',
+                    required: true,
+                },
+            },
+        });
+
+        if (!answer)
+        {
+            return;
+        }
 
         // Get data from JSON file
         const data = this.getTranslatedDataFromJsonFile();
