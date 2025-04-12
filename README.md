@@ -29,3 +29,10 @@ SKIP_PROCESSING='false'     # Boolean for processing the PDF into JSON
 SAVE_TO_JSON_FILE='true'    # Boolean for saving the processed JSON to local files (necessary in order to save to the database - also works as a final manual human check to ensure all data is correct before saving to the database)
 SAVE_TO_DATABASE='true'     # Boolean for saving to the database
 ```
+
+## Known Issues
+This data parser gets around 93-98% of the data correct, though some issues had to be corrected by-hand. Sometimes:
+- Special Defense or Speed would be set as the first number of the base stat total instead of the number for their respective stat. This is likely because the base stat total is occasionally read as being on the same or a different line from special defense or speed, which confused the PDF reader.
+- Move or Ability names with more than one word in them didn't have a space between each words.
+- The imperial weight (lbs) was duplicated to the PTU weight class value.
+- The Mountable Capability did not include the number after it to specify how many riders can mount the Pokemon at once.
